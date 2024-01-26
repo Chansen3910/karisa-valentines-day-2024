@@ -1,0 +1,4 @@
+All Frames resources should be placed in the "static" folder,
+as SvelteKit mangles the URLs to produce lightweight bundles. 
+
+The alternative is to use :url lookup selectors.
