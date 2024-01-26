@@ -116,6 +116,17 @@ export async function romanticDinner(engine) {
     controls.setOnWheelDown(function(e) {
         engine.camera.position.z += 0.2;
     });
+    controls.setUpdateOnPressed(function() {
+        if(controls.keyStates.has(`Escape`)) {
+            engine.renderScene(SCENES.enter);
+        }
+        if(controls.keyStates.has(` `)) {
+            engine.renderScene(SCENES.charismaticCapers);
+        }
+        if(controls.keyStates.has(`Enter`)) {
+            engine.renderScene(SCENES.charismaticCapers);
+        }
+    });
 
 
 
@@ -134,6 +145,8 @@ export async function romanticDinner(engine) {
 
         //Rotation of scene
         romanticDinner.rotation.y -= 0.01;
+        
+        controls?.update();
 
         //Animation
         if(mixer) mixer.update(0.05);
@@ -150,6 +163,7 @@ export async function romanticDinner(engine) {
         }
 
         //Flush controls
+        controls.flush();
         controls.destroy();
 
         //Destroy UI template

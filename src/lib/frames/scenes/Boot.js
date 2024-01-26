@@ -1,20 +1,10 @@
 import * as THREE from 'three';
-//import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import * as SCENES from '../Scenes.js';
+import ControlsManager from '../ControlsManager.js';
 
 let timeoutId;
 
 export async function boot(engine) {
-
-    /*
-    const pmremGenerator = new THREE.PMREMGenerator( engine.renderer );
-    const hdriLoader = new RGBELoader();
-    hdriLoader.load(`./frames/assets/hdris/stuttgart_hillside_1k.hdr`, function (texture) {
-        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-        texture.dispose();
-        scene.environment = envMap
-    });
-    */
 
     let scene = await new THREE.Scene();
     scene.name = `boot`;
@@ -22,6 +12,7 @@ export async function boot(engine) {
     scene.transitionOut = `radialFadeOut`;
 
     let logo, cyan, magenta, mixer;
+    let controls = new ControlsManager(engine);
 
     [
         logo,
@@ -33,11 +24,6 @@ export async function boot(engine) {
             async function(gltf) {
                 await gltf.scene.traverse(async function(child) {
                     child.frustumCulled = false;
-                    if(child.isMesh) {
-                        //console.log(child.name);
-                        //if(child.name.includes("karisa-happy-halloween")) happyHalloweenTicker = child;
-                        //if(child.name.includes("look-at-how-cute-we-are")) lookAtUsTicker = child;
-                    }
                 });
                 gltf.scene.animations = await gltf.animations;
             }
@@ -58,13 +44,34 @@ export async function boot(engine) {
     await engine.camera.position.set(logo.position.x, logo.position.y, logo.position.z + 9);
     await engine.camera.lookAt(logo.position.x, logo.position.y, logo.position.z);
 
+
+
+    controls.setUpdateOnPressed(function() {
+        if(controls.keyStates.has(`Escape`)) {
+            engine.renderScene(SCENES.enter);
+        }
+        if(controls.keyStates.has(` `)) {
+            engine.renderScene(SCENES.romanticDinner);
+        }
+        if(controls.keyStates.has(`Enter`)) {
+            engine.renderScene(SCENES.romanticDinner);
+        }
+    });
+
+
+
     scene.update = function() {
+        controls?.update();
+
         if(mixer) mixer.update(0.03);
     }
     
     scene.cleanup = async function() {
-        //The implementation of timeouts is unpredictable, so we will clear the timeout created earlier using its id to prevent possible errors.
         clearTimeout(timeoutId);
+
+        controls.flush();
+        controls.destroy();
+
         await scene.traverse(async function(obj) {
             if(obj instanceof THREE.Mesh) {
                 await obj.geometry.dispose();
@@ -74,7 +81,6 @@ export async function boot(engine) {
         });
     }
 
-    //Store the id so that it can be cleared later.
     timeoutId = setTimeout(async function() {
         await engine.renderScene(SCENES.romanticDinner);
     }, 7000);

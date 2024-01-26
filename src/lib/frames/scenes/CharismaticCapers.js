@@ -195,8 +195,8 @@ export async function charismaticCapers(engine) {
         }
 
         //Flush controls
-        controls.destroy();
         controls.flush();
+        controls.destroy();
 
         //Destroy UI template
         let element;
