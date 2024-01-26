@@ -42,7 +42,7 @@ export async function enter(engine) {
     button.className = 'col center finger';
     button.value = 'Enable audio';
     button.onclick = function() {
-        engine.renderScene(SCENES.charismaticCapers);
+        engine.renderScene(SCENES.romanticDinner);
     }
 
     innerDiv.appendChild(heading);

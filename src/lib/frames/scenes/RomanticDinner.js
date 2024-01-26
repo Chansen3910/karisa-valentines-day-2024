@@ -101,7 +101,7 @@ export async function romanticDinner(engine) {
     pressStart.style.fontSize = `20px`;
     pressStart.textContent = `PRESS START`;
     pressStart.onclick = function() {
-        engine.renderScene(SCENES.enter);
+        engine.renderScene(SCENES.charismaticCapers);
     }
     pressStartDiv.appendChild(pressStart);
 
