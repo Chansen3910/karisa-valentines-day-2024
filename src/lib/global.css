@@ -2,6 +2,15 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: 'chiaro';
+    src: url('/fonts/chiaro.otf');
+}
+@font-face {
+    font-family: 'pop joy';
+    src: url('/fonts/pop-joy.ttf');
+}
+
 body {
     margin: 0px;
     padding: 0px;
@@ -38,6 +47,10 @@ body {
 
 .evenly {
     justify-content: space-evenly !important;
+}
+
+.end {
+    justify-content: end !important;
 }
 
 .w-100 {

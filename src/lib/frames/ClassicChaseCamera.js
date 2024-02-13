@@ -15,14 +15,16 @@ export class ClassicChaseCamera {
         this.camera.position.y = this.player.position.y + 4;
         this.camera.lookAt(
             this.player.position.x,
-            this.player.position.y + 1.5,
+            this.player.position.y + 2.5,
             this.player.position.z
         );
         //the constant here is the distance back the camera will fly in to float position
         followBehind(this.player, this.camera, this.distance, 7);
     }
     wheel(delta) {
-        this.distance += delta;
+        this.distance -= delta/100;
+        if(this.distance > 12) this.distance = 12;
+        else if(this.distance < -12) this.distance = -12;
         //this.camera.position.y += delta/2.5;
     }
 }

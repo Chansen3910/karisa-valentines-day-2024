@@ -3,23 +3,19 @@ import * as SCENES from '../Scenes.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import ControlsManager from '../ControlsManager.js';
 import { ClassicChaseCamera } from '../ClassicChaseCamera.js';
+import { FastIndex } from '../FastIndex.js';
 
 let audio;
-let startPosition = {
-    position: {
-        x: 0,
-        y: 0,
-        z: 0
-    },
-    rotation: {
-        x: 0,
-        y: 0,
-        z: 0
-    }
+let meshes = {
+    water: [],
+    waterfall: []
 };
+
+
 
 export async function charismaticCapers(engine) {
 
+    let active = true;
     const pmremGenerator = new THREE.PMREMGenerator( engine.renderer );
     const hdriLoader = new RGBELoader();
     hdriLoader.load(`./frames/assets/hdris/autumn_forest_04_1k.hdr`, function(texture) {
@@ -39,12 +35,14 @@ export async function charismaticCapers(engine) {
 
 
     let controls = new ControlsManager(engine);
-    let karisa;
+    let subject;
     let map;
+    let collisionMesh;
+    let ball;
     let mixer;
     let chaser;
 
-    karisa = await engine.loadGlb(
+    subject = await engine.loadGlb(
         './frames/assets/karisa-archer.glb',
         async function(gltf) {
             await gltf.scene.traverse(async function(child) {
@@ -70,7 +68,19 @@ export async function charismaticCapers(engine) {
                     child.castShadow = true;
                 }
                 if(child.isMesh) {
-                    //console.log(child.name);
+                    if(
+                        (child.name == `water-1`) ||
+                        (child.name == `water-2`) ||
+                        (child.name == `water-3`)
+                    ) {
+                        meshes.water.push(child);
+                    }else if(
+                        (child.name == `waterfall-1`) ||
+                        (child.name == `waterfall-2`) ||
+                        (child.name == `river`)
+                    ) {
+                        meshes.waterfall.push(child);
+                    }
                     //if(child.name.includes("karisa-happy-halloween")) happyHalloweenTicker = child;
                     //if(child.name.includes("look-at-how-cute-we-are")) lookAtUsTicker = child;
                 }
@@ -78,23 +88,33 @@ export async function charismaticCapers(engine) {
             gltf.scene.animations = await gltf.animations;
         }
     );
-    await scene.add(karisa, map);
-    await karisa.position.set(startPosition.position.x, startPosition.position.y, startPosition.position.z);
-    await karisa.position.set(0, 1.3, 0);
+    collisionMesh = await engine.loadGlb(
+        './frames/assets/charismatic-capers-collision-mesh.glb',
+        async function(gltf) {
+            await gltf.scene.traverse(async function(child) {
+                child.frustumCulled = false;
+            });
+            gltf.scene.animations = await gltf.animations;
+        }
+    );
+    ball = await engine.loadGlb(
+        './frames/assets/ball.glb',
+        async function(gltf) {
+            await gltf.scene.traverse(async function(child) {
+            });
+            gltf.scene.animations = await gltf.animations;
+        }
+    );
+    await scene.add(subject, map, ball);
 
-    chaser = new ClassicChaseCamera(engine.camera, karisa);
+    chaser = new ClassicChaseCamera(engine.camera, subject);
 
 
 
-    mixer = await new THREE.AnimationMixer(karisa);
-    karisa.animations.forEach(function(clip) {
+    mixer = await new THREE.AnimationMixer(subject);
+    subject.animations.forEach(function(clip) {
         mixer.clipAction(clip).play();
     });
-
-    //await engine.camera.position.set(karisa.position.x, karisa.position.y + 5, karisa.position.z + 5);
-    //await engine.camera.lookAt(karisa.position.x, karisa.position.y + 3, karisa.position.z);
-
-
 
     /*
     "Feathered Fantasy I: Karisa's Charismatic Capers"
@@ -103,7 +123,7 @@ export async function charismaticCapers(engine) {
     "Valentine Voyage: Turkey Trails"
     "Lovebird Lanes: Cupid's Carnival"
     "Quirky Quiver: Heart's Delight"
-    "Arrow Arcade: Cozy Cupid Capers"
+    "Arrow Arcade: Karisa Cupid Capers"
     "Turkey Tidings: Love's Play"
     "Whimsical Wings: Heartbeat Hoopla"
     "Valentine's Vista: Bow Bliss"
@@ -111,60 +131,83 @@ export async function charismaticCapers(engine) {
     "Cherished Chase: Amour Afloat"
     */
 
-
+    controls.setOnWheelUp(function(e) {
+        chaser.wheel(e.wheelDelta);
+    });
+    controls.setOnWheelDown(function(e) {
+        chaser.wheel(e.wheelDelta);
+    });
 
     controls.setUpdateOnPressed(function() {
-        if(controls.keyStates.has(`Escape`)) {
-            engine.renderScene(SCENES.enter);
-        }
-        if(controls.keyStates.has(`w`)) {
-            karisa.translateZ(0.6);
-        }
-        if(controls.keyStates.has(`s`)) {
-            karisa.translateZ(-0.4);
-        }
-        if(controls.keyStates.has(`Shift`)) {
-            //karisa.translateY(-0.8);
-            console.log(karisa.position);
-        }
-        if(controls.keyStates.has(` `)) {
-            //karisa.translateY(0.8);
-        }
-        if(controls.keyStates.has(`a`)) {
-            if(!controls.keyStates.has(`w`)) {
-                karisa.translateZ(0.06);
-                karisa.rotation.y += (0.2);
+        if(active) {
+            //escape
+            if(controls.keyStates.has(`27`)) {
+                active = false;
+                engine.renderScene(SCENES.enter);
             }
-            if(controls.keyStates.has(`w`)) {
-                karisa.rotation.y += (0.15);
+            //w
+            if(controls.keyStates.has(`87`)) {
+                subject.translateZ(0.6);
             }
-            if(controls.keyStates.has(`Shift`)) {
-                //karisa.translateY(-0.8);
+            //s
+            if(controls.keyStates.has(`83`)) {
+                subject.translateZ(-0.4);
             }
-            if(controls.keyStates.has(` `)) {
-                //karisa.translateY(0.8);
+            //shift
+            if(controls.keyStates.has(`16`)) {
+                subject.translateY(-0.8);
+                //console.log(subject.position);
             }
-        }
-        if(controls.keyStates.has(`d`)) {
-            if(!controls.keyStates.has(`w`)) {
-                karisa.translateZ(0.06);
-                karisa.rotation.y += (-0.2);
+            //space
+            if(controls.keyStates.has(`32`)) {
+                subject.translateY(0.8);
             }
-            if(controls.keyStates.has(`w`)) {
-                karisa.rotation.y += (-0.15);
+            //a
+            if(controls.keyStates.has(`65`)) {
+                //w
+                if(!controls.keyStates.has(`87`)) {
+                    subject.translateZ(0.06);
+                    subject.rotation.y += (0.2);
+                }
+                //w
+                if(controls.keyStates.has(`87`)) {
+                    subject.rotation.y += (0.15);
+                }
+                //shift
+                if(controls.keyStates.has(`16`)) {
+                    //subject.translateY(-0.8);
+                }
+                //space
+                if(controls.keyStates.has(`32`)) {
+                    //subject.translateY(0.8);
+                }
             }
-            if(controls.keyStates.has(`Shift`)) {
-                //karisa.translateY(-0.8);
-            }
-            if(controls.keyStates.has(` `)) {
-                //karisa.translateY(0.8);
+            //d
+            if(controls.keyStates.has(`68`)) {
+                //w
+                if(!controls.keyStates.has(`87`)) {
+                    subject.translateZ(0.06);
+                    subject.rotation.y += (-0.2);
+                }
+                //w
+                if(controls.keyStates.has(`87`)) {
+                    subject.rotation.y += (-0.15);
+                }
+                //shift
+                if(controls.keyStates.has(`16`)) {
+                    //subject.translateY(-0.8);
+                }
+                //space
+                if(controls.keyStates.has(`32`)) {
+                    //subject.translateY(0.8);
+                }
             }
         }
 
-        if(karisa.position.z > 239) karisa.position.z = 239;
-        if(karisa.position.z < -239) karisa.position.z = -239;
-        if(karisa.position.x > 239) karisa.position.x = 239;
-        if(karisa.position.x < -239) karisa.position.x = -239;
+        if(subject.position.z > 239) subject.position.z = 239;
+        if(subject.position.z < -239) subject.position.z = -239;
+        if(subject.position.x > 239) subject.position.x = 239;
+        if(subject.position.x < -239) subject.position.x = -239;
     });
 
 
@@ -174,13 +217,35 @@ export async function charismaticCapers(engine) {
         //engine.uiElement.appendChild(mainDiv);
     }
 
+
+
+    let fast = new FastIndex(collisionMesh);
+    await fast.populate();
+
     scene.update = function() {
+        //UV animations
+        meshes.water.forEach(function(value, index, array) {
+            value.material.map.offset.y += 0.001;
+            value.material.map.offset.x += 0.002;
+        });
+        meshes.waterfall.forEach(function(value, index, array) {
+            value.material.map.offset.y -= 0.01;
+        });
 
         //Animation
-        if(mixer) mixer.update(0.05);
+        mixer?.update(0.05);
 
-        //Controls
+        
+        let previous = new THREE.Vector3(
+            subject.position.x,
+            subject.position.y,
+            subject.position.z
+        );
+
+        //Controls set new player position
         controls?.update();
+
+        fast.floor(previous, subject, ball);
 
         //Chase camera update
         chaser?.update();
@@ -217,6 +282,7 @@ export async function charismaticCapers(engine) {
     audio = await new Audio(`./frames/assets/Harvest-Moon-Hero-of-Leaf-Valley-Spring.mp3`);
     audio.onended = async function() {
         //await engine.renderScene(SCENES.boot);
+        audio.currentTime = 11;
         audio.play();
     };
 

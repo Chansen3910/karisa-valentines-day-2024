@@ -3,11 +3,14 @@ import * as SCENES from '../Scenes.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import ControlsManager from '../ControlsManager.js';
 
+let zoomedIn = false;
 let audio;
 let completePlayback = false;
 
+
 export async function romanticDinner(engine) {
 
+    let active = true;
     const pmremGenerator = new THREE.PMREMGenerator( engine.renderer );
     const hdriLoader = new RGBELoader();
     hdriLoader.load(`./frames/assets/hdris/satara_night_4k.hdr`, function(texture) {
@@ -27,6 +30,8 @@ export async function romanticDinner(engine) {
 
     let controls = new ControlsManager(engine);
     let romanticDinner;
+    let logo;
+    let logoTitleMesh;
     let candles = [];
     let mixer;
 
@@ -51,7 +56,28 @@ export async function romanticDinner(engine) {
             gltf.scene.animations = await gltf.animations;
         }
     );
-    await scene.add(romanticDinner);
+    logo = await engine.loadGlb(
+        './frames/assets/charismatic-capers-logo-2.glb',
+        async function(gltf) {
+            await gltf.scene.traverse(async function(child) {
+                child.frustumCulled = false;
+                if(child.isLight) {
+                    child.castShadow = true;
+                    child.intensity = 0.9;
+                    child.decay = 4;
+                }
+                console.log(child);
+                if(child.isMesh && child.name == `Text010`) {
+                    logoTitleMesh = child;
+                }
+            });
+            gltf.scene.animations = await gltf.animations;
+        }
+    );
+    await scene.add(romanticDinner, logo);
+
+    await logo.scale.set(0.5, 0.5, 0.5);
+    await logo.position.set(0, 4.3, 7);
 
 
 
@@ -60,7 +86,7 @@ export async function romanticDinner(engine) {
         mixer.clipAction(clip).play();
     });
 
-    await engine.camera.position.set(romanticDinner.position.x, romanticDinner.position.y + 5, romanticDinner.position.z + 5);
+    await engine.camera.position.set(romanticDinner.position.x, romanticDinner.position.y + 5, logo.position.z + 10);
     await engine.camera.lookAt(romanticDinner.position.x, romanticDinner.position.y + 3, romanticDinner.position.z);
 
 
@@ -79,10 +105,14 @@ export async function romanticDinner(engine) {
     "Heartfelt Heights: Turkey Triumph"
     "Cherished Chase: Amour Afloat"
     */
+    //let titleComponent = document.createElement('sc-cmp');
 
     let mainDiv = document.createElement('div');
-    mainDiv.className = 'w-100 h-100 col evenly unselectable';
+    mainDiv.className = 'w-100 h-100 col center end unselectable';
 
+    //mainDiv.appendChild(titleComponent);
+
+/*
     let titleDiv = document.createElement(`div`);
     titleDiv.className = `w-100 col center unselectable`;
     let titleA = document.createElement('h1');
@@ -93,38 +123,64 @@ export async function romanticDinner(engine) {
     titleB.style.fontSize = `30px`;
     titleDiv.appendChild(titleA);
     titleDiv.appendChild(titleB);
+*/
 
     let pressStartDiv = document.createElement('div');
-    pressStartDiv.className = `w-100 col center`;
     let pressStart = document.createElement('span');
-    pressStart.className = `unselectable finger`;
-    pressStart.style.fontSize = `20px`;
-    pressStart.textContent = `PRESS START`;
-    pressStart.onclick = function() {
-        engine.renderScene(SCENES.charismaticCapers);
-    }
+    pressStart.className = `unselectable`;
+    pressStart.style.fontSize = `30px`;
+    pressStart.style.fontStyle = `italic`;
+    pressStart.style.whiteSpace = `pre`;
+    pressStart.textContent = `Z O O M   I N`;
+    pressStart.style.fontFamily = 'chiaro';
+    pressStart.style.visibility = `hidden`;
+    pressStart.interval = setInterval(function() {
+        pressStart.style.visibility = (pressStart.style.visibility == `hidden`)? (`visible`): (`hidden`);
+    }, 1000);
     pressStartDiv.appendChild(pressStart);
+    pressStartDiv.style.marginBottom = `30px`;
 
-    mainDiv.appendChild(titleDiv);
+    //mainDiv.appendChild(titleDiv);
     mainDiv.appendChild(pressStartDiv);
 
 
 
     controls.setOnWheelUp(function(e) {
-        engine.camera.position.z -= 0.2;
+        engine.camera.position.z -= Math.max(Math.abs(engine.camera.position.z) / 12, 0.2);
+        if(engine.camera.position.z < 7) {
+            zoomedIn = true;
+            pressStart.textContent = `P R E S S   S T A R T`;
+            pressStartDiv.classList.add(`finger`);
+            pressStartDiv.onclick = function() {
+                if(active == true) {
+                    clearInterval(pressStart.interval);
+                    active = false;
+                    engine.renderScene(SCENES.charismaticCapers);
+                }
+            }
+        }
     });
     controls.setOnWheelDown(function(e) {
-        engine.camera.position.z += 0.2;
+        engine.camera.position.z += Math.max(Math.abs(engine.camera.position.z) / 12, 0.2);
+        if(engine.camera.position.z > logo.position.z + 10) engine.camera.position.z = logo.position.z + 10;
     });
     controls.setUpdateOnPressed(function() {
-        if(controls.keyStates.has(`Escape`)) {
-            engine.renderScene(SCENES.enter);
-        }
-        if(controls.keyStates.has(` `)) {
-            engine.renderScene(SCENES.charismaticCapers);
-        }
-        if(controls.keyStates.has(`Enter`)) {
-            engine.renderScene(SCENES.charismaticCapers);
+        if(active) {
+            //escape
+            if(controls.keyStates.has(`27`)) {
+                active = false;
+                engine.renderScene(SCENES.enter);
+            }
+            //space
+            if(controls.keyStates.has(`32`) && zoomedIn) {
+                active = false;
+                engine.renderScene(SCENES.charismaticCapers);
+            }
+            //enter
+            if(controls.keyStates.has(`13`) && zoomedIn) {
+                active = false;
+                engine.renderScene(SCENES.charismaticCapers);
+            }
         }
     });
 
@@ -141,6 +197,11 @@ export async function romanticDinner(engine) {
         //Candle light intensity modulation.
         candles[0].intensity = Math.sin(time) * 0.2 + 0.3;
         candles[1].intensity = Math.sin(time + (Math.PI)) * 0.2 + 0.3;
+        
+        //logoTitleMesh.material.map.offset.y = (candles[0].intensity / 7);
+        logoTitleMesh.material.map.offset.y -= 0.002;
+        //logoTitleMesh.material.map.offset.x = candles[1].intensity / 7;
+
         time += Math.PI / 15;
 
         //Rotation of scene
@@ -156,6 +217,7 @@ export async function romanticDinner(engine) {
     }
     
     scene.cleanup = async function() {
+        clearInterval(pressStart.interval);
         //Stop audio
         if(!audio.paused) {
             audio.pause();
@@ -184,6 +246,7 @@ export async function romanticDinner(engine) {
 
     audio = await new Audio(`./frames/assets/Animal-Crossing-Title-Theme.mp3`);
     audio.onended = async function() {
+        active = false;
         await engine.renderScene(SCENES.boot);
     };
 

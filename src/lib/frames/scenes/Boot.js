@@ -6,6 +6,7 @@ let timeoutId;
 
 export async function boot(engine) {
 
+    let active = true;
     let scene = await new THREE.Scene();
     scene.name = `boot`;
     scene.transitionIn = `radialFadeIn`;
@@ -47,14 +48,22 @@ export async function boot(engine) {
 
 
     controls.setUpdateOnPressed(function() {
-        if(controls.keyStates.has(`Escape`)) {
-            engine.renderScene(SCENES.enter);
-        }
-        if(controls.keyStates.has(` `)) {
-            engine.renderScene(SCENES.romanticDinner);
-        }
-        if(controls.keyStates.has(`Enter`)) {
-            engine.renderScene(SCENES.romanticDinner);
+        if(active) {
+            //escape
+            if(controls.keyStates.has(`27`)) {
+                active = false;
+                engine.renderScene(SCENES.enter);
+            }
+            //space
+            if(controls.keyStates.has(`32`)) {
+                active = false;
+                engine.renderScene(SCENES.romanticDinner);
+            }
+            //enter
+            if(controls.keyStates.has(`13`)) {
+                active = false;
+                engine.renderScene(SCENES.romanticDinner);
+            }
         }
     });
 
@@ -82,7 +91,10 @@ export async function boot(engine) {
     }
 
     timeoutId = setTimeout(async function() {
-        await engine.renderScene(SCENES.romanticDinner);
+        if(active) {
+            active = false;
+            await engine.renderScene(SCENES.romanticDinner);
+        }
     }, 7000);
 
     return(scene);

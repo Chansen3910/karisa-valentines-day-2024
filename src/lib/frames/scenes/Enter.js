@@ -3,6 +3,7 @@ import * as SCENES from '../Scenes.js';
 
 export async function enter(engine) {
 
+    let active = true;
     let scene = await new THREE.Scene();
     scene.background = await new THREE.Color('rgb(0, 0, 0)');
     scene.name = `enter`;
@@ -42,7 +43,10 @@ export async function enter(engine) {
     button.className = 'col center finger';
     button.value = 'Enable audio';
     button.onclick = function() {
-        engine.renderScene(SCENES.boot);
+        if(active) {
+            active = false;
+            engine.renderScene(SCENES.boot);
+        }
     }
 
     innerDiv.appendChild(heading);

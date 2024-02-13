@@ -146,18 +146,20 @@ export default class ControlsManager {
         (e.deltaY < 0)? (this.wheelUp(e)): (this.wheelDown(e));
     }
     onKeyUp(e) {
+        e.preventDefault();
         //If the key is currently pressed down (present in the keyStates set), remove it from the set (indicating that it is no longer pressed).
-        if(this.keyStates.has(`${e.key}`)) this.keyStates.delete(`${e.key}`);
+        if(this.keyStates.has(`${e.keyCode}`)) this.keyStates.delete(`${e.keyCode}`);
         
         //If there is a callback set to handle this particular keyUp event (on this key), call it; otherwise, defer the action to the nullishKey function of this context.
-        if(this.engine.isActive()) (this.keyUps[`${e.key}`] ?? this.nullishKey)(e);
+        if(this.engine.isActive()) (this.keyUps[`${e.keyCode}`] ?? this.nullishKey)(e);
     }
     onKeyDown(e) {
+        e.preventDefault();
         //If the key is not present in the keyStates set (indicating that it is not pressed), add it to the set (indicating that it is being pressed).
-        if(!this.keyStates.has(`${e.key}`)) this.keyStates.add(`${e.key}`);
+        if(!this.keyStates.has(`${e.keyCode}`)) this.keyStates.add(`${e.keyCode}`);
         
         //If there is a callback set to handle this particular keyDown event (on this key), call it; otherwise, defer the action to the nullishKey function of this context.
-        if(this.engine.isActive()) (this.keyDowns[`${e.key}`] ?? this.nullishKey)(e);
+        if(this.engine.isActive()) (this.keyDowns[`${e.keyCode}`] ?? this.nullishKey)(e);
     }
     update() {
         if(!this.engine.isActive()) return;

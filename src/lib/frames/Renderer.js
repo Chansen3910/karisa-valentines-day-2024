@@ -128,7 +128,7 @@ export class SceneManager {
                 this.currentScene.update();
                 this.renderer.render(this.currentScene, this.camera);
             //}
-        }.bind(this), 40);
+        }.bind(this), 40);//40
         //this.userInterface.log(`Interval id ${ this.currentScene.interval } reserved.`);
         
         //play the currentScene's specified transitionIn property on the filter element.

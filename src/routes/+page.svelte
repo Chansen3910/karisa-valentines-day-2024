@@ -1,6 +1,7 @@
 <script>
     import '$lib/global.css';
     import { onMount, onDestroy } from "svelte";
+    import Component from '../lib/components/Component.svelte';
 
     let Frames;
 
