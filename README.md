@@ -1,38 +1,33 @@
-# create-svelte
+# Heartstring Heroine: Charismatic Capers
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+A web-based game written by Collin Hansen for Karisa.
 
-## Creating a project
+## Enter the city of Carthage
 
-If you're seeing this, you've probably already done this step. Congrats!
+As the smoke clears and the last remnant of civilization 
+emerges from an age of darkness, a sinister presence 
+lingers in the air... Just kidding, the city is not even 
+named Carthage lol.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Enter the city of `Cardia`
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+Though the people of the lovely city of `Cardia` may seem 
+nice, they trust no one.. If you cause any blockages or 
+arrhythmia to their daily routine, they will not hesitate 
+to arrest and bypass you!! This may seem vein and cold-
+hearted to some, but to the people of Cardia, the beat of 
+their drum is entirely involuntarily, and WARRANTED.
 
-## Developing
+After all, the crown is rumored to bear the secrets of the 
+"Heart of Gold", a canonical utterance known to many only 
+by the many permutations of ancient Aortic myths and tall 
+tales. Most people find the stories heart to even believe, 
+but still, nefarious treasure hunters do not skip a beat in 
+their attempts to lay siege and steal the precious heart of 
+the people of Cardia.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Lately, among other abnormal and mysterious happenstances, 
+the "heart attacks" have become more frequent, and are 
+believed to be supplied by a distal foe.. May you get to 
+the heart of the matter and defibrillate this coronary 
+conundrum???
